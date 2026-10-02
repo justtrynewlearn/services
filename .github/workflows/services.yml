@@ -1,1 +1,21 @@
-name: services
+name: Services
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-services:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: testuser
+          POSTGRES_DB: testdb
+
+    steps:
+      - name: Check service
+        run: |
+          echo "PostgreSQL service is running"
