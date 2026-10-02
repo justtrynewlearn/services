@@ -40,7 +40,7 @@ jobs:
             -d testdb \
             -c "SELECT version();"
 
-      - name: Check database
+      - name: Create users table
         env:
           PGPASSWORD: postgres
         run: |
@@ -49,4 +49,30 @@ jobs:
             -p 5432 \
             -U testuser \
             -d testdb \
-            -c "SELECT current_database();"
+            -c "CREATE TABLE users (
+                  id SERIAL PRIMARY KEY,
+                  name VARCHAR(50) NOT NULL
+                );"
+
+      - name: Insert test data
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql \
+            -h localhost \
+            -p 5432 \
+            -U testuser \
+            -d testdb \
+            -c "INSERT INTO users (name)
+                VALUES ('Alice'), ('Bob'), ('Charlie');"
+
+      - name: Select test data
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql \
+            -h localhost \
+            -p 5432 \
+            -U testuser \
+            -d testdb \
+            -c "SELECT * FROM users ORDER BY id;"
