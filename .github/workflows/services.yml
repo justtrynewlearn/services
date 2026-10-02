@@ -38,6 +38,57 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client redis-tools
 
+      - name: Create PostgreSQL table
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql \
+            -h localhost \
+            -p 5432 \
+            -U testuser \
+            -d testdb \
+            -c "CREATE TABLE users (
+                  id SERIAL PRIMARY KEY,
+                  name VARCHAR(50) NOT NULL
+                );"
+
+      - name: Insert PostgreSQL data
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql \
+            -h localhost \
+            -p 5432 \
+            -U testuser \
+            -d testdb \
+            -c "INSERT INTO users (name)
+                VALUES ('Alice'), ('Bob'), ('Charlie');"
+
+      - name: Read PostgreSQL data
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql \
+            -h localhost \
+            -p 5432 \
+            -U testuser \
+            -d testdb \
+            -c "SELECT * FROM users ORDER BY id;"
+
+      - name: Write data to Redis
+        run: |
+          redis-cli \
+            -h localhost \
+            -p 6379 \
+            SET test_key "Hello from Redis"
+
+      - name: Read data from Redis
+        run: |
+          redis-cli \
+            -h localhost \
+            -p 6379 \
+            GET test_key
+
       - name: Check PostgreSQL
         env:
           PGPASSWORD: postgres
