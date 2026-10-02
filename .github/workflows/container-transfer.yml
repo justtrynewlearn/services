@@ -1,0 +1,48 @@
+name: Container Transfer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create result in container
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/results:/results" \
+            alpine:3.20 \
+            sh -c 'echo "{\"status\":\"PASS\",\"value\":123}" > /results/result.json'
+
+      - name: Show generated result
+        run: |
+          cat results/result.json
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-result
+          path: results/result.json
+
+  consume:
+    needs: generate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download result
+        uses: actions/download-artifact@v5
+        with:
+          name: container-result
+          path: results
+
+      - name: Show downloaded result
+        run: |
+          cat results/result.json
+
+      - name: Read result inside new container
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/results:/results" \
+            alpine:3.20 \
+            cat /results/result.json
